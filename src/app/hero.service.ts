@@ -29,7 +29,7 @@ export class HeroService {
       .pipe(
         tap(heroes => this.log('fetched heroes')),
         catchError(this.handleError<Hero[]>('getHeroes', []))
-      )
+      );
   }
 
   getHero(id: number): Observable<Hero> {
@@ -39,21 +39,21 @@ export class HeroService {
       pipe(
         tap(_ => this.log(`fetched hero id=${id}`)),
         catchError(this.handleError<Hero>(`getHero id=${id}`))
-      )
+      );
   }
 
   updateHero(hero: Hero): Observable<any> {
     return this.http.put(this.heroesurl, hero, this.httpOptions).pipe(
       tap(_ => this.log(`updated hero id=${hero.id}`)),
       catchError(this.handleError<any>('updateHero'))
-    )
+    );
   }
 
   addHero(hero: Hero): Observable<Hero> {
     return this.http.post<Hero>(this.heroesurl, hero, this.httpOptions).pipe(
       tap((newHero: Hero) => this.log(`added hero w/ id=${newHero.id}`)),
       catchError(this.handleError<Hero>('addHero'))
-    )
+    );
   }
 
   deleteHero(hero: Hero | number): Observable<Hero> {
@@ -63,7 +63,18 @@ export class HeroService {
     return this.http.delete<Hero>(url, this.httpOptions).pipe(
       tap(_ => this.log(`deleted hero id=${id}`)),
       catchError(this.handleError<Hero>('deleteHero'))
-    )
+    );
+  }
+
+  searchHeroes(term: string): Observable<Hero[]> {
+    if (!term.trim()) {
+      // 検索語がない場合、空の配列を返す
+      return of([]);
+    }
+    return this.http.get<Hero[]>(`${this.heroesurl}/?name=${term}`).pipe(
+      tap(_ => this.log(`found heroes matching "${term}"`)),
+      catchError(this.handleError<Hero[]>(`searchHeroes`, []))
+    );
   }
 
   /**
